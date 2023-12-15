@@ -8,7 +8,6 @@ COPY package-lock.json ./
  
 #im install the node package
 RUN npm ci --legacy-peer-deps
-RUN npm i --legacy-peer-deps
 #just copying the rest of the code base
 COPY . .
 RUN npm run build
