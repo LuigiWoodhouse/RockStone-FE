@@ -10,11 +10,10 @@ const Page = {
   analysis:"analysis",
 }
 
-function Layout({ children }) {
+function Layout({ props }) {
   const [currentPage, setCurrentPage] = useState(0);
 
   const setPage = ((value) => {
-    console.log(value);
     setCurrentPage(value);
   });
 
@@ -25,7 +24,7 @@ function Layout({ children }) {
       <Sidebar setCurrentPage={setPage}/>
 
       <div className="pt-14 md:pl-72 pt-30">
-        {children[currentPage]}
+        {props[currentPage]}
       </div>
     </div>
   );

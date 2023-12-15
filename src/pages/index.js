@@ -5,7 +5,7 @@ import ReactRecorder from '../components/ReactRecorder';
 export default function Home() {
   return (
     <>
-      <Layout children={[<ReactRecorder key={0}/>, <Board  key={1}/> , <div key={0}></div>]}/>
+      <Layout props={[<ReactRecorder key={0}/>, <Board  key={1}/> , <div key={0}></div>]}/>
     </>
   );
 }
