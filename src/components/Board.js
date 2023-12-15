@@ -2,7 +2,7 @@ import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { useState, useEffect } from "react";
 import { DotsVerticalIcon, PlusCircleIcon } from "@heroicons/react/outline";
 import CardItem from "./Card";
-import BoardData from "../data/boarddata.json";
+import axios from "axios";
 
 function createGuidId() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -12,21 +12,43 @@ function createGuidId() {
   });
 }
 
+const rockstoneApi = axios.create({
+  baseURL: "http://localhost:8080",
+  headers: {
+    "content-type": "multipart/form-data",
+  },
+});
+
+
 function Board() {
   const [ready, setReady] = useState(false);
-  const [boardData, setBoardData] = useState(BoardData);
+  const [databoard, setDataBoard] = useState([{}]);
   const [showForm, setShowForm] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState(0);
+
+
+  const  getBoardData = async () => {
+    try {
+      const { data: transcriptData } = await rockstoneApi.get(
+        `/audio/text`
+      );
+      setDataBoard(transcriptData.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   useEffect(() => {
     if (process.browser) {
       setReady(true);
     }
-  });
+    getBoardData();
+    
+  }, []);
 
   const onDragEnd = (re) => {
     if (!re.destination) return;
-    let newBoardData = boardData;
+    let newBoardData = databoard;
     var dragItem =
       newBoardData[parseInt(re.source.droppableId)].items[re.source.index];
     newBoardData[parseInt(re.source.droppableId)].items.splice(
@@ -38,7 +60,7 @@ function Board() {
       0,
       dragItem
     );
-    setBoardData(newBoardData);
+    setDataBoard(newBoardData);
   };
 
   const addTaskHandler = (e) => {
@@ -64,7 +86,7 @@ function Board() {
         };
         let newBoardData = boardData;
         newBoardData[boardId].items.push(item);
-        setBoardData(newBoardData);
+        setDataBoard(newBoardData);
         setShowForm(false);
         e.target.value = "";
       }
@@ -75,9 +97,9 @@ function Board() {
     <div className="mt-[110px]">
       {ready && (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            {BoardData.map((board, bIndex) => (
-              <div key={bIndex} className="bg-white shadow-md rounded-md ">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 px-5">
+            {[{name:"In Progress"}, {name:"Completed"}].map((board, bIndex) => (
+              <div key={bIndex} className="bg-white shadow-md rounded-md">
                 <Droppable droppableId={bIndex.toString()}>
                   {(provider) => (
                     <div {...provider.droppableProps} ref={provider.innerRef}>
@@ -87,14 +109,16 @@ function Board() {
                         </span>
                         <DotsVerticalIcon className="w-4 h-4 text-gray-500 mb-4" />
                       </h4>
-                      {board.items.length > 0 &&
-                        board.items.map((item, iIndex) => {
+                      {databoard.length > 0 &&
+                        databoard.map((item, iIndex ) => {
                           return (
+                            <div key={iIndex}>
                             <CardItem
                               key={item.id}
-                              data={item}
-                              index={iIndex}
+                              data={ bIndex < 1 ? item : null}
+                              index={bIndex > 0 ? iIndex + 1 : iIndex+1000}
                             />
+                            </div>
                           );
                         })}
 
